@@ -178,4 +178,179 @@ const promise = new Promise((resolve, reject) => {
    .finally(() => console.log('done')) 
 
 
-/*MAKE NETWORK REQUEST WITH `FETCH()` */
+/*MAKE NETWORK REQUEST WITH `FETCH()` 
+
+Application Programming Interface (API) is a means for software to communicate with other software. in a word, API is a helpful service. 
+the geolocation feature on the windows object is a type of API: window.navigator.geolocation. 
+
+REST API - if there is a 'type' of data, a REST API may have been created for it. this includes weather data. to get the data, use 
+javascript to make a network request, aka, an ajax request. 
+
+data is commonly used in applications via CRUD. usually create, read, update and delete data. REST API''s give the equivalent of these
+operations when working with remote data. to create new data with REST API, need to create a POST request. POST is the name of the http
+method which is a piece of data that tells the API what I want to do. sending the request with a POST method will cause the API to create
+a new resource. use GET method if just want to request a resource from the API to read it. to update a resource with data that already 
+exists, use PUT or PATCH methods. to delete a resource remotely, perform a DELETE request. 
+
+Both POST and PUT/PATCH require data to be provided on the request to be able to create or update the resource. while GET and DELETE 
+request just require either the GET or DELETE method to be provided w/o any data to get or delete. 
+
+CRUD: 
+create POST
+read GET
+update PUT / PATCH
+delete DELETE
+
+http://jsonplaceholder.typicode.com/posts  -> an API that give post data from a blog API
+http://jsonplaceholder.typicode.com  -> all the routes/endpoints u can make requests to and appropriate HTTP method to use for each  
+https://github.com/public-apis/public-apis -> table of API's. Off category = NO means no authentication/API key to required to use
+
+simplest way to make a network request is by using a browser  which performs a GET request and returns the data. JSON data is the 
+primary format that data sent over web thru these requests. JSON stands for JavaScript Object Notation
+
+fetch(url) requires a url to make a request to. the url is called an API endpoint. 
+
+making a get request with fetch() to a single endpoint, the /posts/1 endpoint. this will fetch a single blog post. to make get request, 
+execute fetch() as a function. the 1st argument is the endpoint i want to get data from:
+    fetch('https://jsonplaceholder.typicode.com/posts/1')
+
+this statement returns a Promise. do not have to write Promises on my own because they are baked into many tools such as fetch(). 
+to get the data, chain on then(). for every request made, get back a response, which is an object that includes alot of info. want the
+data from the response body, which is the data wanted when making the request. in this case, would be the post. 
+
+the response body isn't always in the form needed, usually need to convert to a format javascript can handle. fetch() contains many methods
+which helps convert the response body data to a useable format. can convert body to json data with response.json(). this is a method on the
+response. make sure to call the method -> response.json() and not write as a property -> response.json.
+the response.json() method also returns a Promise. to resolve this Promise, will need another then() callback. get data with this then()
+
+to add a new blog post, use the route '/posts' which accepts POST requests. so route will be:
+    fetch('https://jsonplaceholder.typicode.com/posts')
+
+need to pass 2nd argument, a configuration object option. since making a post request, declare method property as 'POST'. since POST
+creates a new resource, want to provide a blog post. so need to provide blog post data with the request typically as JSON data. 1st need
+to tell API sending JSON data to it. to do that, put a special string on request called a header. use the header, which tells the data/or 
+contact type being sent over (which is JSON data). so create an object (headers) and set on headers the property Content-Type to the string
+application/JSON.  
+
+
+                fetch('https://jsonplaceholder.typicode.com/posts', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json" 
+                },
+                })
+
+
+finally will need the body property. need to create a resource with an object that contains the properties title, body and userid. create 
+an object with properties: 
+
+                const blogPost = {
+                title: "Cool post",
+                body: "lkajsdflkjasjlfda",
+                userId: 1  
+                }
+
+now need to convert object to JSON because its data type being sent. use JSON.stringify() to convert  which will be provided on body 
+property. 
+
+                fetch('https://jsonplaceholder.typicode.com/posts', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json" 
+                },
+                body: JSON.stringify(blogPost)
+                })
+
+need to address possibility of having a problem with request. for example, if make a GET request to non-existing endpoint:
+
+            fetch('https://jsonplaceholder.typicode.com/pots/1')  -> misspelled posts
+            .then(response => response.json())
+            .then(data => console.log(data))
+
+in this example an empty object {} will be returned. the fetch() promise will resolve even with a failing status code. empty {} is an
+indication from API that request failed. a failed request will not run the catch() callback. to have catch() handle the failed request 
+(by console logging the error). need to detect error myself. to do that, can use property on the response called ok. changing arrow
+function yo have a normal function body. response.ok will be set to true indicating a successful response if it has a status code. 
+meaning an indication from REST API as to the success or failure of the request. it will be successful response if status code in 200 
+range. if not in 200 range, response.ok is false, meaning request failed. if response.ok is false, throw error message 'Oops'. when 
+throw an error in this callback, catch() will immediately catch error in the catch() callback:
+
+                fetch('https://jsonplaceholder.typicode.com/pots/1')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Oops!')   
+                    }
+                })
+
+or throw status code from response. better approach because provides info on why request failed. can get from response.status:
+
+                fetch('https://jsonplaceholder.typicode.com/pots/1')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(response.status)   
+                    }
+                })
+
+errors with status in 400 range means there was a problem with how the request was made. could be made by programmer or user
+errors with status in 500 range means there was a problem with the server. 
+
+will work with GET and POST the most when working with REST API's. */
+
+
+ /*GET /posts/1 - returns a single blog post. data returned as an object with following properties: 
+
+ {userId: 1, id: 1, title: "sunt aut facere repellat provident occaecati excepturi optio reprehenderit"
+ body: "quia et suscipit suscipit recusandae consequuntur expedita et cum reprehenderit molestiae ut ut quas totam nostrum rerum est 
+ autem sunt rem eveniet architecto"}
+*/
+fetch('https://jsonplaceholder.typicode.com/posts/1')  //providing fetch() an endpoint only using route /posts/1
+  .then(response => response.json())
+  .then(data => console.log(data))
+
+/*can interact with object. getting title property:
+    sunt aut facere repellat provident occaecati excepturi optio reprehenderit
+*/
+fetch('https://jsonplaceholder.typicode.com/posts/1')
+  .then(response => response.json())
+  .then(data => console.log(data.title))
+
+
+/*POST /posts returns added blog post.  also returns a custom id property (id: 101). this was generated by REST API to confirm 
+successful post was created.
+
+main difference between GET and POST requests is the 2nd argument in POST request. 2nd argument includes method, headers and body. 
+
+returns new post {title: "Cool post", body: "lkajsdflkjasjlfda", userId: 1, id: 101}
+*/
+const blogPost = {          //creating resource for body  object created for body
+    title: "Cool post",
+    body: "lkajsdflkjasjlfda",
+    userId: 1  
+  }
+  
+  fetch('https://jsonplaceholder.typicode.com/posts', {  //using route /posts. 2nd argument includes method, headers and body
+    method: "POST",
+    headers: {
+       "Content-Type": "application/json" 
+    },
+    body: JSON.stringify(blogPost)                      //JSON.stringify() converts object to JSON
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+
+/*program makes a GET request to a non-existing endpoint (misspelled 'posts' in fetch() method)
+a failed request will not run the catch() callback. need to detect error myself. using response.ok to detect error.
+if error occurs and is thrown in callback, catch() will immediately catch error in the catch() callback: 
+
+returns Error: 404 (which means resource not found)
+*/
+fetch('https://jsonplaceholder.typicode.com/pots/1')
+  .then(response => {                                 //changing from arrow function to normal body function.       
+      if (!response.ok) {                             //!response.ok = false, meaning status code not generated, thus resulting in error                           
+        throw new Error(response.status)   
+      }
+  })
+  .then(data => console.log(data))
+  .catch(error => console.error(error))              //error immediately caught in catch() callback 
+  
+
