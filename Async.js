@@ -362,12 +362,12 @@ Get the user with ID 3 and log their name and company they work for. Handle erro
  Here's the endpoint: https://jsonplaceholder.typicode.com/users/3
 */
 fetch("https://jsonplaceholder.typicode.com/users/3")  //returns a Promise
-.then(response => {                                    //when Promise resolved, get access to the response 
+.then(response => {                                    //when Promise resolved, use then() to get access to the response, which is an object
     console.log(response)                              //returns a response object
     if (!response.ok) {                                //if response evaluates as false/falsy, throw an error
         throw new Error(response.status) 
     }
-    return response.json()  //else convert response object to json file. return object to be able to work with data. returns another Promise
+    return response.json()  //else convert response object to json file. return object to be able to work with data. generates another Promise
 })
 .then(person => {  //when Promise from response.json() is resolved, get direct access to the response object
     console.log(`${person.name} works for ${person.company.name}`) 
@@ -375,7 +375,125 @@ fetch("https://jsonplaceholder.typicode.com/users/3")  //returns a Promise
 .catch(err => console.log(err))   //catches any error and throws error response code/status
 
 
-/*DEAD-SIMPLE PROMISES WITH ASYNC-AWAIT */
+/*DEAD-SIMPLE PROMISES WITH ASYNC-AWAIT 
+
+summary of program below:
+
+fetch('https://jsonplaceholder.typicode.com/posts/1')
+  .then(response => response.json())
+  .then(data => console.log(data)) 
+
+1. first use fetch() function to make a request for a single post data from the /posts/1 endpoint. 
+2. get back response in the 1st then() callback and use the json method off of response to convert response body to json data.
+3. in the 2nd then() get actual object data. which logs to the console.
+
+
+there is an alternative way of this Promise that doesn't require multiple callback functions. can make it look like synchronous code
+where can resolve the Promise and immediately put it in a variable. 
+
+1. first create a function that declares what i want the Promise to do. since i want the function to resolve the Promise, i can add the 
+keyword async in front of function keyword: 
+    async function getBlogPost() {}
+    
+to write an arrow function, the async will be before the function parameters  since its the beginning of the arrow function itself:
+    const getBlogPost = async () => {}
+
+using async keyword before a function always returns a Promise. 
 
 
 
+
+*/
+
+/*
+any function prepended with the async keyword automatically returns a Promise. 
+if there is not an error in the function body when executed, the Promise will be fulfilled or resolved successfully. 
+then() access the data returned from a successful Promise. 
+*/
+async function getBlogPost() {}
+getBlogPost().then(() => console.log('works as a promise'))  //returns works as a promise. 
+
+/*if i return a value 'works here too!' from the function, unless returns an error, the value will be passed to the then() callback.
+to display in browser, get the value being passed to the resolve() function. then get the value in the parameters of then() and do 
+what i want with data (console.log(value)) */
+async function getBlogPost() {
+    return resolve('works here too!')   
+  }  
+  getBlogPost().then(value => console.log(value))   //returns works here too!
+
+/*  *****************************OVERVIEW OF PROMISES/THEN()
+notes provides an overview of how traditional Promises are created, 
+how new Promises are subsequently created and how to resolve the promises. also, how then() is used to gain access to the data from
+the resolved promises. 
+
+program creates a traditional Promise with a Promise constructor and creates a new Promise instance within the getBlogPost() function. 
+function mimics an API call with a set setTimeOut()
+
+excluding callback passed to setTimeOut(), there are 3 functions being created for just 1 blog post/1 value:
+    Promise(), then(), finally(). 
+
+*/
+function getBlogPost() {
+    const promise = new Promise((resolve, reject) => {  //promise constructor with required parameters.
+      setTimeout(() => resolve('blog post'), 1000)     //pass setTimeOut() a function to resolve a text blog post after a second. 
+    }) 
+    
+    promise                                           //grab a reference to the new promise. to resolve the new promise:
+      .then(value => console.log(value))              //use then() to get value passed to resolve ('blog-post') and console.log it
+      .finally(() => console.log('done'))             //when all is done, use finally() and within finally() callback, console.log 'done'
+  }
+  getBlogPost()  //running function
+
+
+/*
+not using then() and finally() but instead telling getBlogPost() function to pause until the Promise is resolved. and after its resolved, 
+put the resolved value in a variable, and only then continue the function till the end to run 'done' console log. 
+
+this can be accomplished by declaring function 'async' but also using the 'await' keyword. await performs the following:
+    1. pauses code on the line its used
+    2. resolves promise when its placed before a promise
+    3. allows for immediate use of the resolve value 
+    4. resumes the function
+
+the following program displays power of async-await -> removes the need for callback functions and is readable. 
+
+the syntax does not replace promises. i am merely wrapping promises in a better syntax. i cannot resolve promises with await unless its
+within a function thats prepend with async keyword. async can work without await. but await cannot work without async. 
+*/
+async function getBlogPost() {
+    const promise = new Promise((resolve, reject) => {  //function will be on hold until the promise is resolved
+      setTimeout(() => resolve('blog post'), 1000) 
+    }) 
+    
+    const result = await promise   //putting resolved promise in variable called result. after resolving promise, function will resume
+    console.log(result)            //console.logging the promise variable 
+    console.log('done')            //since function has resumed, can do whatever i want afterwards
+
+  }
+  getBlogPost()                 //calling function. program runs each line in the proper order  'blog post' followed by 'done'
+
+/*making async network request look like synchronous code (no callback functions). 
+this program pauses functions to wait for an awaited promise to resolve so code runs in the exact order written. 
+
+1. create function with async keyword. with async keyword, function returns a promise. (this promise is expected to resolve, no need to await)
+
+2. since calling fetch() request returns a promise, can use await to resolve this particular promise. 
+can immediately do what i like with the result, which i am getting back as the response.  (similar to -> .then(response)
+then put the response object in a variable.  
+
+3. next, to get the json data, call response.json(). since response.json() returns a promise, 
+need to await the promise from response.json(). now put the variable from this expression into a variable called data.
+next console.log data or do whatever i want with it. 
+
+4. finally call the function. */
+
+async function getPost() {  //create function with async keyword, returns a promise. 
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts/1')   //use await to resolve promise produced from fetch(). 
+    const data = await response.json()   //response.json() returns a promise. need to await promise. putting into variable 'data' 
+    console.log(data)                    //console log 'data' or do whatever i want afterwards
+ }
+ getPost()    //call function
+
+
+
+ /* CATCH ERRORS WITH ASYNC-AWAIT */
