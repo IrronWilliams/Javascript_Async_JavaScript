@@ -495,5 +495,144 @@ async function getPost() {  //create function with async keyword, returns a prom
  getPost()    //call function
 
 
+ /* CATCH ERRORS WITH ASYNC-AWAIT 
 
- /* CATCH ERRORS WITH ASYNC-AWAIT */
+ Promise.reject() is the easiest way to reject a promise. when using await, will not get an error. 
+
+ within an async function, if you await on a promise that gets rejected, javascript will throw a catchable error. need a way to catch 
+ this error, which is typically done with a try/catch. try/catch is a very helpful way of handling errors in async code because its useful
+ for handling code with synchronous errors that are not caught until run time when the code is executed. 
+
+ the await keyword is what converts the rejected promises to catchable errors. 
+
+ it is important to put forth effort to catch a promise. because in many cases when a promise does not operate as expected, want to 
+ inform the user of application about the unsuccessful promise. hopefully the user can possibly fix the problem. this process provides 
+ opportunity to inform user what is taking place and what they can do to fix it. 
+ */
+
+async function runAsync() {
+    await Promise.reject()   //purposely rejecting a promise
+    console.log('hi') 
+}
+  runAsync()   //returns nothing. the promise will silently fail. the function will never run
+
+/*can inform programmer/user of error by using try{} and catch. in try, put all code that i want to run successfully. put all errors in 
+catch (receive the error in a pair of parenthesis  catch(error). can handle error by using console.error(error) and passing the error 
+to it. 
+ */
+async function runAsync() {
+    try { 
+      await Promise.reject()   
+    } catch (error) {
+      console.error(error)  
+    }  
+  } 
+  runAsync()  //returns null
+
+/*to see an error, pass in a created error and pass in message. program will run, promise gets rejected, and gets logged to the console.
+this handles the event of managing a failed promise. 
+*/
+async function runAsync() {
+    try { 
+      await Promise.reject(Error('Oops'))   
+    } catch (error) {
+      console.error(error)  
+    }  
+  }  
+  runAsync()  //Error: Oops
+
+/*try/catch catches synchronous and asynchronous errors */
+async function runAsync() {
+    try { 
+      await Promise.resolve('hello world')  
+      null.someProperty = true    //attempting to add a property to null. 
+    } catch (error) {
+      console.error(error)  
+    }  
+  }
+  runAsync()   //returns TypeError: Cannot set property 'someProperty' of null
+
+/*the await keyword is what converts the rejected promises to catchable errors. need the await keyword when using return*/
+async function runAsync() {
+    try { 
+      //return Promise.reject(Error('Oops'))  //this will cause catch to not run. need await keyword
+      return await Promise.reject(Error('Oops'))  //adding await will will return Error: Oops
+      // null.someProperty = true  
+    } catch (error) {
+      console.error(error)  
+    }  
+  }
+  runAsync() 
+
+/*
+ in addition to a try/catch, can use another pattern which takes advantage of fact that every function prepended with async returns a
+ promise. this patten can catch errors from resolving promise by chaining the catch method when calling function. this allow for catching
+ values that are passed to reject. can further pass error to console.error(error). this program returns Error: Oops. 
+ */
+async function runAsync() {
+    return await Promise.reject(Error('Oops'))  //can send error to catch()
+  }
+  runAsync().catch(error => console.error(error))  //chaining catch(). catching values passed to reject and further passing value to console.error()
+
+/*program makes a request to a REST API (API that allows to get users from github). function designed to get the users github data, but 
+may experience a problem doing so (user may not exist). want to throw an error when promise is not successful.
+
+the approach is to set up a try/catch. where in try, put code to successfully resolve promise, otherwise catch errors that may take place,
+and log with console.error(). due to the nature of fetch(), need to manually throw error myself in order to catch error. this can be done
+by if statement (!response.ok). if response.ok is not true, then throw a new error code from response.status.
+*/
+async function getGithubUser() {
+    try {    
+      const response = await fetch('https://api.github.com/users/laksjdflasjfdlkjadfjk')  //user name is followed by users/
+      if (!response.ok) {                  //due to nature of fetch(), need to manually throw error to catch. if response.ok = false, 
+        throw new Error(response.status)   //throw error code from response.status                    
+      }
+    } catch (error) {                      //catches new error from the throw syntax
+      console.error(error)                 //logs new error from throw syntax 
+      console.log('Could not fetch user, try resetting your connection')   //can provide user with detailed message
+      alert(error.message)   //if error message had detailed info from status, can provide user additional instructions. 
+
+    } 
+  }
+  getGithubUser()  //returns Error: 404 because user unable to be found. 
+
+/*Challenge: 
+Rewrite the GET API call from the previous challenge using async-await
+
+fetch('https://jsonplaceholder.typicode.com/users/3')
+  .then(response => {
+      if (!response.ok) {
+        throw new Error(response.status)   
+      }
+      
+      return response.json()
+  })
+  .then(person => console.log(`${person.name} works for ${person.company.name}`))
+  .catch(err => console.error(err))  
+*/
+async function getUser() {
+    const response = await fetch('https://jsonplaceholder.typicode.com/users/3')  
+    console.log(response)  //now have access to data. this is a response object, need to response.json() as a result.
+    const person = await response.json()   //response.json occurs asynchronously, so need to await. store response in variable
+    console.log(person)  //now have access to person
+  } 
+  getUser()
+
+/*making program a bit more robust in order to handle errors by wrapping in a try/catch statement. telling javascript to try everything
+in try{}. if anything fails, catch{} the error.
+*/
+async function getUser() {
+    try {
+      const response = await fetch('https://jsonplaceholder.typicode.com/users/3') 
+      if (!response.ok) {  //if evaluates to false, throw error
+        throw new Error(response.status) 
+      }
+      const person = await response.json() 
+      console.log(person)     
+    }
+      catch (error) {   //catch error and log it
+        console.log(error) 
+    }
+  
+  } 
+  getUser()
