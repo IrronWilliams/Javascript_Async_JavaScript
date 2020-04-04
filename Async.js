@@ -398,12 +398,7 @@ keyword async in front of function keyword:
 to write an arrow function, the async will be before the function parameters  since its the beginning of the arrow function itself:
     const getBlogPost = async () => {}
 
-using async keyword before a function always returns a Promise. 
-
-
-
-
-*/
+using async keyword before a function always returns a Promise. */
 
 /*
 any function prepended with the async keyword automatically returns a Promise. 
